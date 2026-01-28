@@ -12,12 +12,32 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
+            // --- CAMPOS POR DEFECTO DE LARAVEL ---
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();
+            
+            
+            
+            // 1. Datos Personales Extra
+            $table->string('phone_number', 15)->nullable();
+            $table->date('birth_date')->nullable();
+
+            // 2. Dirección Desglosada (Para envíos)
+            $table->string('street', 50)->nullable();
+            $table->string('neighborhood', 100)->nullable();
+            $table->string('city', 100)->nullable();
+            $table->string('state', 100)->nullable();
+            $table->string('postal_code', 10)->nullable();
+            $table->string('country', 50)->default('México');
+
+            // 3. Roles (CRÍTICO: Admin, Gestor, Comprador)
+            // En Postgres esto crea una restricción CHECK automáticamente
+            $table->enum('role', ['admin', 'gestor', 'comprador'])->default('comprador');
+
             $table->timestamps();
         });
 

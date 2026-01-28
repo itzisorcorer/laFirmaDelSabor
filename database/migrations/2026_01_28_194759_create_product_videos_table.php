@@ -13,6 +13,11 @@ return new class extends Migration
     {
         Schema::create('product_videos', function (Blueprint $table) {
             $table->id();
+
+            //muchos videos pertenecen a un producto
+            $table->foreignId('product_id')->constrained()->onDelete('cascade');
+            $table->string('url_youtube');
+            $table->text('accessibility_description')->nullable();
             $table->timestamps();
         });
     }
