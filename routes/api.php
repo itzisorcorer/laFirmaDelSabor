@@ -3,10 +3,13 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ProductController;
 
 //APARTADO RUTAS PÚBLICAS
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+//producto
+Route::get('/products', [ProductController::class, 'index']); //ver productos catálogo
 
 //APARTADO RUTAS PRIVADAS
 Route::middleware('auth:sanctum')->group(function (){
@@ -17,6 +20,8 @@ Route::middleware('auth:sanctum')->group(function (){
     Route::get('/user', function(Request $request){
         return $request->user();
     });
+    //crear producto (protegido)
+    Route::post('/products', [ProductController::class, 'store']);
 
 });
 

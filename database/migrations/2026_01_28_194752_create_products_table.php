@@ -26,7 +26,7 @@ return new class extends Migration
             $table->boolean('status')->default(true);
 
             //descripcion de la accesibilidad
-            $table->text('accessibility_descrioption')->nullable();
+            $table->text('accessibility_description')->nullable();
 
             //POR CHECAR
             $table->string('main_image_url')->nullable();
