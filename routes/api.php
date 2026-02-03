@@ -4,6 +4,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProductVideoController;
+use App\Http\Controllers\OrderController;
 
 //APARTADO RUTAS PÚBLICAS
 Route::post('/register', [AuthController::class, 'register']);
@@ -22,6 +24,13 @@ Route::middleware('auth:sanctum')->group(function (){
     });
     //crear producto (protegido)
     Route::post('/products', [ProductController::class, 'store']);
+
+    //ruta para videos
+    Route::post('/products/{id}/videos', [ProductVideoController::class, 'store']);
+
+    //pedidos
+    Route::post('/orders', [OrderController::class, 'store']); //comprar
+    Route::get('/orders', [OrderController::class, 'index']); //ver historial
 
 });
 
