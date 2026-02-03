@@ -52,7 +52,7 @@ class OrderController extends Controller
                 $order = Order::create([
                     'user_id' => $request->user()->id,
                     'total_amount' => $totalAmount,
-                    'status' => 'pendiente',
+                    'status' => 'pending',
                 ]);
                     
                     //Creamos los detalles del pedido
