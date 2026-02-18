@@ -19,10 +19,10 @@ class CategorySeeder extends Seeder
             'image_url' => 'assets/categories/alimentos.jpg', //ruta ficticia solo para rellenar campo
         ]);
         //Subcateegorias de alimentos
-        Subcategory::create(['category_id' => $catAlimentos->id, 'name' => 'Salsas']);
-        Subcategory::create(['category_id' => $catAlimentos->id, 'name' => 'Fermentados']);
-        Subcategory::create(['category_id' => $catAlimentos->id, 'name' => 'Postres']);
-        Subcategory::create(['category_id' => $catAlimentos->id, 'name' => 'Platos fuertes']);
+        Subcategory::create(['category_id' => $catAlimentos->category_id, 'name' => 'Salsas']);
+        Subcategory::create(['category_id' => $catAlimentos->category_id, 'name' => 'Fermentados']);
+        Subcategory::create(['category_id' => $catAlimentos->category_id, 'name' => 'Postres']);
+        Subcategory::create(['category_id' => $catAlimentos->category_id, 'name' => 'Platos fuertes']);
 
 
             //CATEGORIA BEBIDAS
@@ -32,11 +32,11 @@ class CategorySeeder extends Seeder
     ]);
 
         //Subcateegorias de bebidas
-        Subcategory::create(['category_id' => $catBebidas->id, 'name' => 'Alcoholicas']);
-        Subcategory::create(['category_id' => $catBebidas->id, 'name' => 'No alcoholicas']);
-        Subcategory::create(['category_id' => $catBebidas->id, 'name' => 'Jugos Naturales']);
-        Subcategory::create(['category_id' => $catBebidas->id, 'name' => 'Aguas de sabor']);
-        Subcategory::create(['category_id' => $catBebidas->id, 'name' => 'Bebidas Calientes']);
+        Subcategory::create(['category_id' => $catBebidas->category_id, 'name' => 'Alcoholicas']);
+        Subcategory::create(['category_id' => $catBebidas->category_id, 'name' => 'No alcoholicas']);
+        Subcategory::create(['category_id' => $catBebidas->category_id, 'name' => 'Jugos Naturales']);
+        Subcategory::create(['category_id' => $catBebidas->category_id, 'name' => 'Aguas de sabor']);
+        Subcategory::create(['category_id' => $catBebidas->category_id, 'name' => 'Bebidas Calientes']);
 
 
         //CATEGORÍA ESPECIALES
@@ -46,11 +46,7 @@ class CategorySeeder extends Seeder
         ]);
 
         //Subcategorias de especiales
-        Subcategory::create(['category_id' => $catEspeciales->id, 'name' => 'Navidad']);
-        Subcategory::create(['category_id' => $catEspeciales->id, 'name' => 'Día de muertos']);
+        Subcategory::create(['category_id' => $catEspeciales->category_id, 'name' => 'Navidad']);
+        Subcategory::create(['category_id' => $catEspeciales->category_id, 'name' => 'Día de muertos']);
     }
-
-
-
-
 }
