@@ -11,11 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('subcategories', function (Blueprint $table) {
-            $table->id('subcategory_id');
-            //foranea con Categories
-            $table->foreignId('category_id')->constrained('categories', 'category_id')->onDelete('cascade');
-            $table->string('name', 70);
+        Schema::create('reviews', function (Blueprint $table) {
+            $table->id('review_id');
+            $table->foreignId('user_id')->constrained('users');
+            $table->foreignId('product_id')->constrained('products', 'product_id');
+            $table->integer('rating')->unsigned();
+            $table->text('comment')->nullable();
             $table->timestamps();
         });
     }
@@ -25,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('subcategories');
+        Schema::dropIfExists('reviews');
     }
 };

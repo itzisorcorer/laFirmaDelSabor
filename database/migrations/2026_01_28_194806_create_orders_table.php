@@ -12,12 +12,23 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('orders', function (Blueprint $table) {
-            $table->id();
+            $table->id('order_id');
 
-            $table->foreignId('user_id')->constrained(); //para el comprador
+            $table->foreignId('user_id')->constrained('users'); //para el comprador
+
+            $table->foreignId('assigned_admin_id')->nullable()->constrained('users'); //para el admin asignado a la orden
 
             $table->decimal('total_amount', 10, 2);
-            $table->enum('status', ['pending', 'delivered', 'canceled', 'in_progress'])->default('pending');
+            $table->enum('status', [
+                'pending', //pendiente
+                'in_progress', //en progreso
+                'labeled', //etiquetado
+                'unassigned', //por asignar
+                'in_transit', // en camino
+                'completed', // finalizado
+                'canceled', // cancelado
+                'delivered' // entregado
+            ])->default('pending');
 
             $table->timestamps();
         });

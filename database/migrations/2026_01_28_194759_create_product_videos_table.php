@@ -12,10 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('product_videos', function (Blueprint $table) {
-            $table->id();
+            $table->id('product_video_id');
 
             //muchos videos pertenecen a un producto
-            $table->foreignId('product_id')->constrained()->onDelete('cascade');
+            $table->foreignId('product_id')->constrained('products', 'product_id')->onDelete('cascade');
             $table->string('url_youtube');
             $table->text('accessibility_description')->nullable();
             $table->timestamps();
