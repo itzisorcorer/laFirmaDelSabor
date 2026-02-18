@@ -10,6 +10,7 @@ class Product extends Model
 {
     //
     use HasApiTokens, HasFactory;
+    protected $primaryKey = 'product_id';
     protected $fillable = [
         'subcategory_id',
         'user_id',

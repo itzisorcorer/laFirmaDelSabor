@@ -10,6 +10,7 @@ class ProductVideo extends Model
 {
     //
     use HasApiTokens, HasFactory;
+    protected $primaryKey = 'product_video_id';
     protected $fillable = [
         'product_id',
         'url_video',

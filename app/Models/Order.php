@@ -10,6 +10,7 @@ class Order extends Model
 {
     //
     use HasFactory, HasApiTokens;
+    protected $primaryKey = 'order_id';
     protected $fillable = [
         'user_id',
         'status',

@@ -6,16 +6,16 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Laravel\Sanctum\HasApiTokens;
 
-class Category extends Model
+class Creator extends Model
 {
-    //
     use HasFactory, HasApiTokens;
-    protected $primaryKey = 'category_id';
+    protected $primaryKey = 'creator_id';
     protected $fillable = [
         'name',
-        'image_url',
+        'biography',
+        'location',
+        'photo_url',
+        'cover_photo_url',
+        'rating_avg'
     ];
-    public function subcategories(){
-        return $this->hasMany(Subcategory::class);
-    }
 }

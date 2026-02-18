@@ -10,6 +10,7 @@ class OrderItem extends Model
 {
     //
     use HasApiTokens, HasFactory;
+    protected $primaryKey = 'item_id';
     protected $table = 'order_items';
     protected $fillable = [
         'order_id',

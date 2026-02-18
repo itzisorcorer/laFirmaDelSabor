@@ -10,6 +10,7 @@ class Subcategory extends Model
 {
     //
     use HasApiTokens, HasFactory;
+    protected $primaryKey = 'subcategory_id';
     protected $fillable = [
         'category_id',
         'name',
