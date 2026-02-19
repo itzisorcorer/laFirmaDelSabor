@@ -11,6 +11,7 @@ class UserHistory extends Model
     use HasApiTokens, HasFactory;
     protected $table = 'user_history';
     protected $primaryKey = 'history_id';
+    public $timestamps = false;
     protected $fillable = [
         'user_id',
         'product_id',

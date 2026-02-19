@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Favorite;
 use Illuminate\Http\Request;
 use App\Models\Product;
+use App\Models\UserHistory;
 use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
@@ -73,5 +75,37 @@ class ProductController extends Controller
             'message' => 'Producto creado correctamente',
             'data' => $product
         ], 201);
+    }
+    //VER LOS DETALLES DE UN PRODUCTO ESPECIFICO
+    // GET /api/products/{id}
+    public function show(Request $request, $id){
+        $product = Product::with(['creator', 'subcategory.category'])->find($id);
+
+        if(!$product || !$product->status){
+            return response()->json([
+                'success' => false,
+                'message' => 'Producto no encontrado o inactivo'
+            ], 404);
+        }
+        $user = $request->user();
+        $isFavorite = false;
+
+        if($user){
+            $isFavorite = Favorite::where('user_id', $user->id)
+            ->where('product_id', $id)
+            ->exists();
+
+            UserHistory::updateOrCreate([
+                'user_id' => $user->id, 'product_id' => $id],
+                ['viewed_at' => now()]
+                );
+        }
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'product' => $product,
+                'is_favorite' => $isFavorite
+            ]
+        ]);
     }
 }

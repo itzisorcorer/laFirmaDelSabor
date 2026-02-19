@@ -8,14 +8,13 @@ use App\Http\Controllers\ProductVideoController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\Api\HomeController;
 use App\Http\Controllers\Api\CreatorController;
+use App\Http\Controllers\Api\FavoriteController;
 
 //APARTADO RUTAS PÚBLICAS
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 //producto
 Route::get('/products', [ProductController::class, 'index']); //ver productos catálogo
-
-
 
 
 
@@ -28,9 +27,13 @@ Route::middleware('auth:sanctum')->group(function (){
     Route::get('/user', function(Request $request){
         return $request->user();
     });
-    //crear producto (protegido)
+    //productos (protegido)
     Route::get('/products', [ProductController::class, 'index']);
     Route::post('/products', [ProductController::class, 'store']);
+    Route::get('/products/{id}', [ProductController::class, 'show']);
+
+    //RUTA DE FAVORITOS 
+    Route::post('/favorites/toogle', [FavoriteController::class, 'toogle']);
 
     //ruta para videos
     Route::post('/products/{id}/videos', [ProductVideoController::class, 'store']);
