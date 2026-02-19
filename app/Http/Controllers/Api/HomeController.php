@@ -35,7 +35,7 @@ class HomeController extends Controller
                     'name' => $product->name,
                     'description' => $product->description,
                     'price' => '$' . number_format($product->price, 2) . ' c/u', // Formateado
-                    'rating' => '4.5', // TODO: Calcular promedio real de Reviews después
+                    'rating' => '4.5', //Calcular promedio real de Reviews después
                     'image_url' => $product->main_image_url,
                     // Aquí ocurre la magia: si el ID está en sus favoritos, devuelve true
                     'is_favorite' => in_array($product->product_id, $favoriteIds),

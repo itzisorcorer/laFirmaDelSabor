@@ -33,7 +33,7 @@ Route::middleware('auth:sanctum')->group(function (){
     Route::get('/products/{id}', [ProductController::class, 'show']);
 
     //RUTA DE FAVORITOS 
-    Route::post('/favorites/toogle', [FavoriteController::class, 'toogle']);
+    Route::post('/favorites/toggle', [FavoriteController::class, 'toogle']);
 
     //ruta para videos
     Route::post('/products/{id}/videos', [ProductVideoController::class, 'store']);

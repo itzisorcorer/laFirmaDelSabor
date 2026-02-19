@@ -32,7 +32,7 @@ class Product extends Model
 
     //pertenece a usuario (el admin que lo sube)
     public function creator(){
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(Creator::class, 'creator_id');
     }
 
     //tiene muchos videos
