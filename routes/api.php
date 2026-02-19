@@ -3,15 +3,21 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\ProductController;
+use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\ProductVideoController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\Api\HomeController;
+use App\Http\Controllers\Api\CreatorController;
 
 //APARTADO RUTAS PÚBLICAS
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 //producto
 Route::get('/products', [ProductController::class, 'index']); //ver productos catálogo
+
+
+
+
 
 //APARTADO RUTAS PRIVADAS
 Route::middleware('auth:sanctum')->group(function (){
@@ -23,6 +29,7 @@ Route::middleware('auth:sanctum')->group(function (){
         return $request->user();
     });
     //crear producto (protegido)
+    Route::get('/products', [ProductController::class, 'index']);
     Route::post('/products', [ProductController::class, 'store']);
 
     //ruta para videos
@@ -31,6 +38,15 @@ Route::middleware('auth:sanctum')->group(function (){
     //pedidos
     Route::post('/orders', [OrderController::class, 'store']); //comprar
     Route::get('/orders', [OrderController::class, 'index']); //ver historial
+
+
+    //ruta para obtener la info de Home:
+    Route::get('/home', [HomeController::class, 'index']);
+
+
+    //Rutas de Creadoras
+    Route::get('/creators', [CreatorController::class, 'index']);
+    Route::post('/creators', [CreatorController::class, 'store']);
 
 });
 

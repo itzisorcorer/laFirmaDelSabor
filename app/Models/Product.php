@@ -14,12 +14,14 @@ class Product extends Model
     protected $fillable = [
         'subcategory_id',
         'user_id',
+        'creator_id',
         'name',
         'description',
         'price',
         'stock',
         'status',
         'main_image_url',
+        'expiration_date',
         'accessibility_description',
     ];
 
