@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\UserHistory;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
+
 
 class ProductController extends Controller
 {
@@ -137,6 +139,37 @@ class ProductController extends Controller
                 'is_favorite' => $isFavorite
             ];
 
+        });
+        return response()->json([
+            'success' => true,
+            'data' => $formattedProducts
+        ]);
+
+    }
+    public function getByCategory(Request $request, $id){
+        //Obtenemos las categorias que pertenecen a esta caegoria padre
+        $subcategories = DB::table('subcategories')
+        ->where('category_id', $id)->pluck('subcategory_id');
+
+        //buscamos los productos que tengamos alguna de esas subcategorias
+        $products = Product::whereIn('subcategory_id', $subcategories)->where('status', 1)->get();
+
+        $user = $request->user();
+
+        //formato
+        $formattedProducts = $products->map(function ($product) use ($user){
+            $isFavorite = $user ? Favorite::where('user_id', $user->id)
+            ->where('product_id', $product->product_id)->exists() : false;
+
+            return[
+                'product_id' => $product->product_id,
+                'name' => $product->name,
+                'description' => $product->description,
+                'price' => '$' . number_format($product->price, 2) . ' c/u',
+                'image_url' => $product->main_image_url,
+                'rating' => '4.5',
+                'is_favorite' => $isFavorite
+            ];
         });
         return response()->json([
             'success' => true,

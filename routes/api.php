@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\ProductVideoController;
-use App\Http\Controllers\OrderController;
+use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\HomeController;
 use App\Http\Controllers\Api\CreatorController;
 use App\Http\Controllers\Api\FavoriteController;
@@ -54,6 +54,12 @@ Route::middleware('auth:sanctum')->group(function (){
 
     //BUSCADOR DE HOME
     Route::get('/search', [ProductController::class, 'search']);
+
+    //RUTA PARA EL FILTRO
+    Route::get('/categories/{id}/products', [ProductController::class, 'getByCategory']);
+
+    //RUTA DE CHECKOUT
+    Route::post('/checkout', [OrderController::class, 'checkout']);
 
 });
 
