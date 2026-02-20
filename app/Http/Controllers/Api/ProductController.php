@@ -108,4 +108,40 @@ class ProductController extends Controller
             ]
         ]);
     }
+    // BUSCADOR DE PRODUCTOS
+    // GET /api/search?q=termino
+    public function search (Request $request){
+        $query = $request->query('q');
+        if(!$query){
+            return response()->json([
+                'success' => true,
+                'data' => []
+
+            ]);
+
+        }
+        //coincidencias con el nombre
+        $products = Product::where('name', 'ilike', '%' . $query . '%')
+        ->where('status', 1)->get();
+        $user = $request->user();
+
+        $formattedProducts = $products->map(function($product) use ($user){
+            $isFavorite = $user ? Favorite::where('user_id', $user->id)->where('product_id', $product->product_id)->exists() : false;
+            return [
+                'product_id' => $product->product_id,
+                'name' => $product->name,
+                'description' => $product->description,
+                'price' => '$' . number_format($product->price, 2) . ' c/u',
+                'image_url' => $product->main_image_url,
+                'rating' => '4.5',
+                'is_favorite' => $isFavorite
+            ];
+
+        });
+        return response()->json([
+            'success' => true,
+            'data' => $formattedProducts
+        ]);
+
+    }
 }

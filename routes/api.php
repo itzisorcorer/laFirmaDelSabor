@@ -51,6 +51,10 @@ Route::middleware('auth:sanctum')->group(function (){
     Route::get('/creators', [CreatorController::class, 'index']);
     Route::post('/creators', [CreatorController::class, 'store']);
 
+
+    //BUSCADOR DE HOME
+    Route::get('/search', [ProductController::class, 'search']);
+
 });
 
 //RUTAS DE PRODUCTOS
