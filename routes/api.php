@@ -40,7 +40,8 @@ Route::middleware('auth:sanctum')->group(function (){
 
     //pedidos
     Route::post('/orders', [OrderController::class, 'store']); //comprar
-    Route::get('/orders', [OrderController::class, 'index']); //ver historial
+    Route::get('/orders', [OrderController::class, 'getMyOrders']); //ver historial
+
 
 
     //ruta para obtener la info de Home:
@@ -60,6 +61,9 @@ Route::middleware('auth:sanctum')->group(function (){
 
     //RUTA DE CHECKOUT
     Route::post('/checkout', [OrderController::class, 'checkout']);
+
+    //visualizar perfil de creadora
+    Route::get('/creators/{id}', [CreatorController::class, 'getProfile']);
 
 });
 

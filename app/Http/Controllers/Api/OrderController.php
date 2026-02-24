@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 
 class OrderController extends Controller
@@ -63,5 +64,32 @@ public function checkout(Request $request)
                 'message' => 'Error al procesar el pago: ' . $e->getMessage()
             ], 500);
         }
+    }
+    //OBTENER MIS PEDIDOS SEGUN EL USUARIO LOGUEADO
+    //GET /api/orders
+    public function getMyOrders(Request $request){
+        $user = $request->user();
+
+        //traemos las ordenes
+        $orders = DB::table('orders')->where('user_id', $user->id)->orderBy('created_at', 'desc')->get();
+
+        //traemos los productos de cada orden
+        $formattedOrders = $orders->map(function ($order){
+            $items = DB::table('order_items')->join('products', 'order_items.product_id', '=', 'products.product_id')
+            ->where('order_items.order_id', $order->order_id)
+            ->select('order_items.amount_item', 'order_items.purchase_price', 'products.name', 'products.main_image_url')->get();
+
+            return[
+                'order_id' => $order->order_id,
+                'total_amount' => $order->total_amount,
+                'status' => $order->status,
+                'date' => Carbon::parse($order->created_at)->format('d/m/Y'),
+                'items' => $items
+            ];
+        });
+        return response()->json([
+            'success' => true,
+            'data' => $formattedOrders
+        ]);
     }
 }
