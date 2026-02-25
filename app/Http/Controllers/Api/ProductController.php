@@ -82,6 +82,10 @@ class ProductController extends Controller
     // GET /api/products/{id}
     public function show(Request $request, $id){
         $product = Product::with(['creator', 'subcategory.category'])->find($id);
+        //obtener los videos relacionados al producto
+        $videos = DB::table('product_videos')->where('product_id', $id)->get();
+
+        $product->videos = $videos;
 
         if(!$product || !$product->status){
             return response()->json([
@@ -106,7 +110,7 @@ class ProductController extends Controller
             'success' => true,
             'data' => [
                 'product' => $product,
-                'is_favorite' => $isFavorite
+                'is_favorite' => $isFavorite,
             ]
         ]);
     }
@@ -177,4 +181,5 @@ class ProductController extends Controller
         ]);
 
     }
+
 }

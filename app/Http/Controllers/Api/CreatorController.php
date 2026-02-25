@@ -103,7 +103,7 @@ class CreatorController extends Controller
                 'rating' => $creator->rating_avg ?? 5.0, 
                 'reviews_count' => $reviewsCount, 
                 // Si hay reseña, la mandamos; si no, un texto bonito por defecto
-                'featured_review' => $featuredReview ? '"' . $featuredReview->comment . '"' : '"Sus productos artesanales son de la más alta calidad y sabor."',
+                'featured_review' => $featuredReview ? '"' . $featuredReview->comment . '"' : '"Este creador aún no tiene reseñas."',
                 'best_rated' => $bestRated
             ]
         ]);
