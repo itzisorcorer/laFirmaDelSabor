@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\HomeController;
 use App\Http\Controllers\Api\CreatorController;
 use App\Http\Controllers\Api\FavoriteController;
 use App\Http\Controllers\Api\GestorController;
+use App\Http\Controllers\Api\AdminController;
 
 //APARTADO RUTAS PÚBLICAS
 Route::post('/register', [AuthController::class, 'register']);
@@ -68,8 +69,12 @@ Route::middleware('auth:sanctum')->group(function (){
 
     //Rutas de gestor:
     Route::get('/gestor/orders', [GestorController::class, 'getAllOrders']);
-Route::get('/gestor/admins', [GestorController::class, 'getAvailableAdmins']);
-Route::put('/gestor/orders/{id}', [GestorController::class, 'updateOrder']);
+    Route::get('/gestor/admins', [GestorController::class, 'getAvailableAdmins']);
+    Route::put('/gestor/orders/{id}', [GestorController::class, 'updateOrder']);
+
+    //RUTAS DE ADMIN
+    Route::get('/admin/orders', [AdminController::class, 'getMyAssignedOrders']);
+    Route::put('/admin/orders/{id}', [AdminController::class, 'updateOrderStatus']);
 
 });
 
