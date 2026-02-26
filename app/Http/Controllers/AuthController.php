@@ -29,7 +29,7 @@ class AuthController extends Controller
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
             'phone_number' => $validated['phone_number'] ?? null,
-            'role' => $request->role,
+            'role' => $request->role ?? 'comprador',
         ]);
 
         //aqui creamos el token de autenticación
