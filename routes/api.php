@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\HomeController;
 use App\Http\Controllers\Api\CreatorController;
 use App\Http\Controllers\Api\FavoriteController;
+use App\Http\Controllers\Api\GestorController;
 
 //APARTADO RUTAS PÚBLICAS
 Route::post('/register', [AuthController::class, 'register']);
@@ -64,6 +65,11 @@ Route::middleware('auth:sanctum')->group(function (){
 
     //visualizar perfil de creadora
     Route::get('/creators/{id}', [CreatorController::class, 'getProfile']);
+
+    //Rutas de gestor:
+    Route::get('/gestor/orders', [GestorController::class, 'getAllOrders']);
+Route::get('/gestor/admins', [GestorController::class, 'getAvailableAdmins']);
+Route::put('/gestor/orders/{id}', [GestorController::class, 'updateOrder']);
 
 });
 
