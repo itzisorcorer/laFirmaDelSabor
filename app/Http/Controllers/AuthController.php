@@ -81,4 +81,26 @@ class AuthController extends Controller
         'message' => 'Sesión cerrada correctamente'
     ]);
     }
+    //ACTUALIZAR PERFIL
+    //Endpoint a usar: PUT /api/profile
+
+    public function updateProfile(Request $request){
+        $user =$request->user();
+
+        $validated = $request->validate([
+            'street' => 'nullable|string|max:70',
+            'neighborhood' => 'nullable|string|max:100',
+            'city' => 'nullable|string|max:50',
+            'state' => 'nullable|string|max:50',
+            'postal_code' => 'nullable|string|max:10',
+            'country' => 'nullable|string|max:50',
+            'phone_number' => 'nullable|string|max:15',
+            'birth_date' => 'nullable|date',
+        ]);
+        $user->update($validated);
+        return response()->json([
+            'message' => 'Perfil actualizado correctamente',
+            'user' => $user
+        ]);
+    }
 }
