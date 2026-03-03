@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 class GestorController extends Controller
@@ -20,12 +21,26 @@ class GestorController extends Controller
             )
             ->orderBy('orders.created_at', 'desc')
             ->get();
+        $formattedOrders = $orders->map(function ($order) {
+            $items = DB::table('order_items')->join('products', 'order_items.product_id', '=', 'products.product_id')
+            ->where('order_items.order_id', $order->order_id)
+            ->select('order_items.amount_item', 'products.name')->get();
 
+            return [
+                'order_id' => $order->order_id,
+                'status' => $order->status,
+                'buyer_name' => $order->buyer_name,
+                'admin_name' => $order->admin_name,
+                'assigned_admin_id' => $order->assigned_admin_id,
+                'created_at' => $order->created_at,
+                'items' => $items
+            ];
+        });
  
 
         return response()->json([
             'success' => true,
-            'data' => $orders
+            'data' => $formattedOrders
         ]);
     }
 

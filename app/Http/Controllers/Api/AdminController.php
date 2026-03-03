@@ -10,16 +10,40 @@ use Nette\Utils\Json;
 class AdminController extends Controller
 {
     //obtener solo las ordenes asignadas a un admin
-    public function getMyAssignedOrders(Request $request){
+// Obtener SOLO las órdenes asignadas a este admin (con sus PRODUCTOS)
+    public function getMyAssignedOrders(Request $request)
+    {
         $user = $request->user();
 
-        $orders = DB::table('orders')->join('users as buyers', 'orders.user_id', '=', 'buyers.id')
-        ->where('assigned_admin_id', $user->id)-> select('orders.*', 'buyers.name as buyer_name')
-        ->orderBy('orders.updated_at', 'desc')->get();
+        $orders = DB::table('orders')
+            ->join('users as buyers', 'orders.user_id', '=', 'buyers.id')
+            ->where('assigned_admin_id', $user->id)
+            ->select(
+                'orders.*', 
+                'buyers.name as buyer_name'
+            )
+            ->orderBy('orders.updated_at', 'desc')
+            ->get();
+
+        // Mapeamos para inyectarle los productos
+        $formattedOrders = $orders->map(function ($order){
+            $items = DB::table('order_items')
+                ->join('products', 'order_items.product_id', '=', 'products.product_id')
+                ->where('order_items.order_id', $order->order_id)
+                ->select('order_items.amount_item', 'products.name')
+                ->get();
+
+            return [
+                'order_id' => $order->order_id,
+                'status' => $order->status,
+                'buyer_name' => $order->buyer_name,
+                'items' => $items
+            ];
+        });
 
         return response()->json([
             'success' => true,
-            'data' => $orders
+            'data' => $formattedOrders
         ]);
     }
     //metodo para que el admin pueda cambiar el estado a los ultimos 2
