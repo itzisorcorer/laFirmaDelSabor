@@ -11,6 +11,7 @@ class AdminController extends Controller
 {
     //obtener solo las ordenes asignadas a un admin
 // Obtener SOLO las órdenes asignadas a este admin (con sus PRODUCTOS)
+// Obtener SOLO las órdenes asignadas a este admin (con sus PRODUCTOS y DIRECCIÓN)
     public function getMyAssignedOrders(Request $request)
     {
         $user = $request->user();
@@ -20,7 +21,12 @@ class AdminController extends Controller
             ->where('assigned_admin_id', $user->id)
             ->select(
                 'orders.*', 
-                'buyers.name as buyer_name'
+                'buyers.name as buyer_name',
+                'buyers.street as buyer_street',
+                'buyers.neighborhood as buyer_neighborhood',
+                'buyers.city as buyer_city',
+                'buyers.postal_code as buyer_postal_code',
+                'buyers.phone_number as buyer_phone'
             )
             ->orderBy('orders.updated_at', 'desc')
             ->get();
@@ -37,6 +43,11 @@ class AdminController extends Controller
                 'order_id' => $order->order_id,
                 'status' => $order->status,
                 'buyer_name' => $order->buyer_name,
+                'buyer_street' => $order->buyer_street,
+                'buyer_neighborhood' => $order->buyer_neighborhood,
+                'buyer_city' => $order->buyer_city,
+                'buyer_postal_code' => $order->buyer_postal_code,
+                'buyer_phone' => $order->buyer_phone,
                 'items' => $items
             ];
         });

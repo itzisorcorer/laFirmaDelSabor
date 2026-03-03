@@ -20,7 +20,6 @@ class Product extends Model
         'price',
         'stock',
         'status',
-        'main_image_url',
         'expiration_date',
         'accessibility_description',
     ];
@@ -38,5 +37,10 @@ class Product extends Model
     //tiene muchos videos
     public function videos(){
         return $this->hasMany(ProductVideo::class);
+    }
+    // Relación: Un producto tiene MUCHAS imágenes
+    public function images()
+    {
+        return $this->hasMany(ProductImage::class, 'product_id', 'product_id');
     }
 }
