@@ -82,12 +82,13 @@ class CreatorController extends Controller
         $bestRated = $products->take(5)->map(function ($p){
             $prodRating = DB::table('reviews')->where('product_id', $p->product_id)->avg('rating');
 
+            $primaryImage = DB::table('product_images')->where('product_id', $p->product_id)->orderByDesc('is_primary')->first();
             return[
                 'product_id' => $p->product_id,
                 'name' => $p->name,
                 'description' => $p->description,
                 'price' => $p->price,
-                'main_image_url' => $p->main_image_url,
+                'main_image_url' => $primaryImage ? $primaryImage->image_url : 'https://img.freepik.com/free-photo/portrait-young-woman-with-natural-make-up_23-2149084945.jpg',
                 'rating' => $prodRating ? round($prodRating, 1): 5.0
 
             ];

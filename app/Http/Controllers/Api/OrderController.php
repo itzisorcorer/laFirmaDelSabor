@@ -67,26 +67,58 @@ public function checkout(Request $request)
     }
     //OBTENER MIS PEDIDOS SEGUN EL USUARIO LOGUEADO
     //GET /api/orders
-    public function getMyOrders(Request $request){
+    public function getMyOrders(Request $request)
+    {
         $user = $request->user();
 
-        //traemos las ordenes
-        $orders = DB::table('orders')->where('user_id', $user->id)->orderBy('created_at', 'desc')->get();
+        // 1. Traemos TODAS las órdenes del usuario
+        $orders = DB::table('orders')
+            ->where('user_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
 
-        //traemos los productos de cada orden
-        $formattedOrders = $orders->map(function ($order){
-            $items = DB::table('order_items')->join('products', 'order_items.product_id', '=', 'products.product_id')
-            ->where('order_items.order_id', $order->order_id)
-            ->select('order_items.amount_item', 'order_items.purchase_price', 'products.name', 'products.main_image_url')->get();
+        if ($orders->isEmpty()) {
+            return response()->json(['success' => true, 'data' => []]);
+        }
 
-            return[
-                'order_id' => $order->order_id,
+        $orderIds = $orders->map(function($o) { return $o->order_id ?? $o->id; })->toArray();
+
+        // 2. Traemos TODOS los items y sus fotos (Con la nueva tabla)
+        $allItems = DB::table('order_items')
+            ->join('products', 'order_items.product_id', '=', 'products.product_id')
+            ->leftJoin('product_images', function($join) {
+                $join->on('products.product_id', '=', 'product_images.product_id')
+                     ->where('product_images.is_primary', true); // Solo la portada
+            })
+            ->whereIn('order_items.order_id', $orderIds)
+            ->select(
+                'order_items.order_id',
+                'order_items.amount_item', 
+                'order_items.purchase_price', 
+                'products.name', 
+                'product_images.image_url as main_image_url' // 👈 Flutter espera este nombre
+            )
+            ->get();
+
+        // 3. Agrupamos los items
+        $itemsByOrder = $allItems->groupBy('order_id');
+
+        // 4. Armamos el paquete
+        $formattedOrders = $orders->map(function ($order) use ($itemsByOrder) {
+            $orderId = $order->order_id ?? $order->id;
+            
+            // Usamos values()->toArray() para forzar que sea una Lista [] y Flutter no se congele
+            $myItems = $itemsByOrder->get($orderId, collect())->values()->toArray();
+
+            return [
+                'order_id' => $orderId,
                 'total_amount' => $order->total_amount,
                 'status' => $order->status,
-                'date' => Carbon::parse($order->created_at)->format('d/m/Y'),
-                'items' => $items
+                'date' => $order->created_at ? Carbon::parse($order->created_at)->format('d/m/Y') : 'Fecha desconocida',
+                'items' => $myItems 
             ];
         });
+
         return response()->json([
             'success' => true,
             'data' => $formattedOrders

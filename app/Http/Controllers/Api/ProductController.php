@@ -7,6 +7,7 @@ use App\Models\Favorite;
 use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\UserHistory;
+use App\Models\ProductImage;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 
@@ -18,7 +19,7 @@ class ProductController extends Controller
     public function index()
     {
         // Traemos los productos activos con sus relaciones
-        $products = Product::with(['subcategory.category', 'creator', 'videos'])
+        $products = Product::with(['subcategory.category', 'creator', 'videos', 'images'])
             ->where('status', true)
             ->get();
 
@@ -34,11 +35,8 @@ class ProductController extends Controller
     {
         // 1. Validar los datos con la nueva estructura ER
         $validated = $request->validate([
-            // Ahora busca específicamente en la columna subcategory_id
             'subcategory_id' => 'required|exists:subcategories,subcategory_id',
-            // NUEVO: Validar que la creadora exista
             'creator_id' => 'required|exists:creators,creator_id', 
-            
             'name' => 'required|string|max:50', 
             'description' => 'required|string', 
             'price' => 'required|numeric|min:0',
@@ -46,16 +44,12 @@ class ProductController extends Controller
             'status' => 'required|boolean',
             'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
             'accessibility_description' => 'required|string',
-            
-            'expiration_date' => 'nullable|date', 
+            'expiration_date' => 'nullable|date',
+            'images' => 'required|array|min:1',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        // Manejar la subida de la imagen
-        $imagePath = null;
-        if($request->hasFile('image')){
-            // Guarda en storage/app/public/products
-            $imagePath = $request->file('image')->store('products', 'public');
-        }
+
 
         //Registrar en la base de datos
         $product = Product::create([
@@ -66,22 +60,36 @@ class ProductController extends Controller
             'description' => $validated['description'],
             'price' => $validated['price'],
             'stock' => $validated['stock'],
-            'main_image_url' => $imagePath,
             'accessibility_description' => $validated['accessibility_description'],
             'expiration_date' => $validated['expiration_date'] ?? null,
             'status' => $validated['status'],
         ]);
+        // Guardar las imágenes relacionadas al producto
+        if($request->hasFile('images')){
+            $isFirst = true;
+            foreach($request->file('images') as $image){
+                $imagePath = $image->store('products', 'public');
+                ProductImage::create([
+                    'product_id' => $product->product_id,
+                    'image_url' => $imagePath,
+                    'is_primary' => $isFirst, // La primera imagen es la principal
+                ]);
+                $isFirst = false; // Solo la primera imagen será la principal
+
+            }
+
+        }
 
         return response()->json([
             'success' => true,
             'message' => 'Producto creado correctamente',
-            'data' => $product
+            'data' => $product->load('images')
         ], 201);
     }
     //VER LOS DETALLES DE UN PRODUCTO ESPECIFICO
     // GET /api/products/{id}
     public function show(Request $request, $id){
-        $product = Product::with(['creator', 'subcategory.category'])->find($id);
+        $product = Product::with(['creator', 'subcategory.category', 'images'])->find($id);
         //obtener los videos relacionados al producto
         $videos = DB::table('product_videos')->where('product_id', $id)->get();
 
@@ -127,18 +135,20 @@ class ProductController extends Controller
 
         }
         //coincidencias con el nombre
-        $products = Product::where('name', 'ilike', '%' . $query . '%')
+        $products = Product::with('images')->where('name', 'ilike', '%' . $query . '%')
         ->where('status', 1)->get();
         $user = $request->user();
 
         $formattedProducts = $products->map(function($product) use ($user){
             $isFavorite = $user ? Favorite::where('user_id', $user->id)->where('product_id', $product->product_id)->exists() : false;
+
+            $primaryImage = $product->images->where('is_primary', true)->first() ?? $product->images->first();
             return [
                 'product_id' => $product->product_id,
                 'name' => $product->name,
                 'description' => $product->description,
                 'price' => '$' . number_format($product->price, 2) . ' c/u',
-                'image_url' => $product->main_image_url,
+                'image_url' => $primaryImage ? $primaryImage->image_url : null,
                 'rating' => '4.5',
                 'is_favorite' => $isFavorite
             ];
@@ -156,7 +166,7 @@ class ProductController extends Controller
         ->where('category_id', $id)->pluck('subcategory_id');
 
         //buscamos los productos que tengamos alguna de esas subcategorias
-        $products = Product::whereIn('subcategory_id', $subcategories)->where('status', 1)->get();
+        $products = Product::with('images')->whereIn('subcategory_id', $subcategories)->where('status', 1)->get();
 
         $user = $request->user();
 
@@ -165,12 +175,14 @@ class ProductController extends Controller
             $isFavorite = $user ? Favorite::where('user_id', $user->id)
             ->where('product_id', $product->product_id)->exists() : false;
 
+            $primaryImage = $product->images->where('is_primary', true)->first() ?? $product->images->first();
+
             return[
                 'product_id' => $product->product_id,
                 'name' => $product->name,
                 'description' => $product->description,
                 'price' => '$' . number_format($product->price, 2) . ' c/u',
-                'image_url' => $product->main_image_url,
+                'image_url' => $primaryImage ? $primaryImage->image_url : null,
                 'rating' => '4.5',
                 'is_favorite' => $isFavorite
             ];
