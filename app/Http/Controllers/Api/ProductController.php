@@ -33,7 +33,7 @@ class ProductController extends Controller
     // POST /api/products
     public function store(Request $request)
     {
-        // 1. Validar los datos con la nueva estructura ER
+        // 1. Validar los datos
         $validated = $request->validate([
             'subcategory_id' => 'required|exists:subcategories,subcategory_id',
             'creator_id' => 'required|exists:creators,creator_id', 
@@ -42,11 +42,12 @@ class ProductController extends Controller
             'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
             'status' => 'required|boolean',
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
             'accessibility_description' => 'required|string',
             'expiration_date' => 'nullable|date',
             'images' => 'required|array|min:1',
             'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
+            'videos' => 'nullable|array',
+            'videos.*' => 'url',
         ]);
 
 
@@ -76,6 +77,21 @@ class ProductController extends Controller
                 ]);
                 $isFirst = false; // Solo la primera imagen será la principal
 
+            }
+
+        }
+        // Guardar los videos relacionados al producto
+        if($request->has('videos')){
+            foreach($request->videos as $videoUrl){
+                if(!empty($videoUrl)){
+                    DB::table('product_videos')->insert([
+                        'product_id' => $product->product_id,
+                        'url_youtube' => $videoUrl,
+                        'accessibility_description' => 'Video relacionado al producto ' . $product->name,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                }
             }
 
         }

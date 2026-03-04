@@ -11,12 +11,13 @@ use App\Http\Controllers\Api\CreatorController;
 use App\Http\Controllers\Api\FavoriteController;
 use App\Http\Controllers\Api\GestorController;
 use App\Http\Controllers\Api\AdminController;
+use App\Http\Controllers\Api\CategoryController;
 
 //APARTADO RUTAS PÚBLICAS
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 //producto
-Route::get('/products', [ProductController::class, 'index']); //ver productos catálogo
+//Route::get('/products', [ProductController::class, 'index']); //ver productos catálogo
 
 
 
@@ -79,6 +80,8 @@ Route::middleware('auth:sanctum')->group(function (){
     //ruta para actualizar datos personales del usuario
     Route::put('/profile', [AuthController::class, 'updateProfile']);
     
+    //Ruta para obtener las categorias y subcategorias (para filtros y creación de productos)
+    Route::get('/categories-data', [CategoryController::class, 'index']);
 
 
 });
