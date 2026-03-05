@@ -34,6 +34,8 @@ Route::middleware('auth:sanctum')->group(function (){
     Route::get('/products', [ProductController::class, 'index']);
     Route::post('/products', [ProductController::class, 'store']);
     Route::get('/products/{id}', [ProductController::class, 'show']);
+    //productos de admin
+    Route::put('/products/{id}', [ProductController::class, 'update']);
 
     //RUTA DE FAVORITOS 
     Route::post('/favorites/toggle', [FavoriteController::class, 'toogle']);

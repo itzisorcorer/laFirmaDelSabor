@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Models\Category;
 use App\Models\Favorite;
 use App\Models\UserHistory;
+use App\Models\ProductImage;
 
 class HomeController extends Controller
 {
@@ -36,7 +37,8 @@ class HomeController extends Controller
                     'description' => $product->description,
                     'price' => '$' . number_format($product->price, 2) . ' c/u', // Formateado
                     'rating' => '4.5', //Calcular promedio real de Reviews después
-                    'image_url' => $product->main_image_url,
+                    'image_url' => ProductImage::where('product_id', $product->product_id)
+                    ->where('is_primary', true)->value('image_url'),
                     // Aquí ocurre la magia: si el ID está en sus favoritos, devuelve true
                     'is_favorite' => in_array($product->product_id, $favoriteIds),
                 ];
@@ -58,7 +60,8 @@ class HomeController extends Controller
                     'description' => $product->description,
                     'price' => '$' . number_format($product->price, 2) . ' c/u',
                     'rating' => '4.5',
-                    'image_url' => $product->main_image_url,
+                    'image_url' => ProductImage::where('product_id', $product->product_id)
+                    ->where('is_primary', true)->value('image_url'),
                     'is_favorite' => in_array($product->product_id, $favoriteIds),
                 ];
             }

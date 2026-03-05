@@ -209,5 +209,80 @@ class ProductController extends Controller
         ]);
 
     }
+    // Actualizar producto (Admin)
+    //POST /api/products/{id}
+    public function update(Request $request, $id){
+        $product = Product::findOrFail($id);
+
+        //validar datos antes de insertar
+        $validated = $request->validate([
+            'subcategory_id' => 'required|exists:subcategories,subcategory_id',
+            'creator_id' => 'required|exists:creators,creator_id',
+            'name' => 'required|string|max:50',
+            'description' => 'required|string',
+            'price' => 'required|numeric|min:1',
+            'stock' => 'required|integer|min:1',
+            'status' => 'required|boolean',
+            'accessibility_description' => 'required|string',
+            'expiration_date' => 'nullable|date',
+            'images' => 'nullable|array',
+            'images.*' => 'image|mimes:jpg,png,jpeg,gif|max:3072',
+            'videos' => 'nullable|array',
+            'videos.*' => 'url',
+        ]);
+        //actualizamos los datos de la base
+        $product->update([
+            'subcategory_id' => $validated['subcategory_id'],
+            'creator_id' => $validated['creator_id'],
+            'name' => $validated['name'],
+            'description' => $validated['description'],
+            'price' => $validated['price'],
+            'stock' => $validated['stock'],
+            'accessibility_description' => $validated['accessibility_description'],
+            'expiration_date' => $validated['expiration_date'] ?? null,
+            'status' => $validated['status'],
+        ]);
+
+        //agregamos nuevas fotos por si se añadieron
+        if($request->hasFile('images')){
+            $hasPrimary = ProductImage::where('product_id', $product->product_id)
+            ->where('is_primary', true)->exists();
+
+            //si no tiene foto de portada, la primera será
+            $isFirst = !$hasPrimary;
+
+            foreach($request->file('images') as $image){
+                $imagePath = $image->store('products', 'public');
+                ProductImage::create([
+                    'product_id' => $product->product_id,
+                    'image_url' => $imagePath,
+                    'is_primary' => $isFirst,
+                ]);
+                $isFirst = false;
+
+            }
+        }
+        //agregamos nuevos videos por si se añadieron
+        if($request->has('videos')){
+            foreach($request->videos as $videoUrl){
+                if(!empty($videoUrl)){
+                    DB::table('product_videos')->insert([
+                        'product_id' => $product->product_id,
+                        'url_youtube' => $videoUrl,
+                        'accessibility_description' => 'Video relacionado al producto ' . $product->name,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+
+                }
+
+            }
+
+        }
+        return response()->json([
+            'success' => true,
+            'message' => 'Producto actualizado correctamente'
+        ]);
+    }
 
 }
