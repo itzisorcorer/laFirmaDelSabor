@@ -7,6 +7,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use App\Models\Product;
 
 
 class OrderController extends Controller
@@ -37,6 +38,20 @@ public function checkout(Request $request)
             // 3. Guardamos el detalle mapeando los nombres de Flutter a tu BD
             $orderItems = [];
             foreach ($request->items as $item) {
+                //Buscamos el producto y validamos stock
+                $product = Product::find($item['product_id']);
+                if(!$product){
+                    throw new Exception("El producto ID {$item['product_id']} no existe.");
+                }
+                if ($product->stock < $item['quantity']) {
+                    throw new Exception("Stock insuficiente para el producto: " . $product->name);
+                }
+                
+                // Descontamos el stock y guardamos
+                $product->stock -= $item['quantity'];
+                $product->save();
+                
+
                 $orderItems[] = [
                     'order_id' => $orderId,
                     'product_id' => $item['product_id'],
@@ -96,7 +111,7 @@ public function checkout(Request $request)
                 'order_items.amount_item', 
                 'order_items.purchase_price', 
                 'products.name', 
-                'product_images.image_url as main_image_url' // 👈 Flutter espera este nombre
+                'product_images.image_url as main_image_url'
             )
             ->get();
 
