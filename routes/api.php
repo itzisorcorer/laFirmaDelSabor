@@ -76,6 +76,7 @@ Route::middleware('auth:sanctum')->group(function (){
     //RUTAS DE ADMIN
     Route::get('/admin/orders', [AdminController::class, 'getMyAssignedOrders']);
     Route::put('/admin/orders/{id}', [AdminController::class, 'updateOrderStatus']);
+    Route::get('/admin/products', [AdminController::class, 'getProducts']);
 
     //ruta para actualizar datos personales del usuario
     Route::put('/profile', [AuthController::class, 'updateProfile']);
@@ -86,8 +87,3 @@ Route::middleware('auth:sanctum')->group(function (){
 
 });
 
-//RUTAS DE PRODUCTOS
-
-
-
-//RUTAS DE PEDIDOS
