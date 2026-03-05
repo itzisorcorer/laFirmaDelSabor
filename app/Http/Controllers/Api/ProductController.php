@@ -10,7 +10,7 @@ use App\Models\UserHistory;
 use App\Models\ProductImage;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
-
+use Symfony\Component\HttpKernel\HttpCache\Store;
 
 class ProductController extends Controller
 {
@@ -229,6 +229,11 @@ class ProductController extends Controller
             'images.*' => 'image|mimes:jpg,png,jpeg,gif|max:3072',
             'videos' => 'nullable|array',
             'videos.*' => 'url',
+            //listas para eliminar fotos o videos existentes
+            'deleted_images' => 'nullable|array',
+            'deleted_images.*'=>'string',
+            'deleted_videos'=>'nullable|array',
+            'deleted_videos.*'=>'string'
         ]);
         //actualizamos los datos de la base
         $product->update([
@@ -276,6 +281,23 @@ class ProductController extends Controller
 
                 }
 
+            }
+
+        }
+        //eliminar las fotos que se pidieron eliminar
+        if($request->has('deleted_images')){
+            foreach($request->deleted_images as $imgUrl){
+                ProductImage::where('product_id', $product->product_id)
+                ->where('image_url', $imgUrl)->delete();
+                //eliminar el archivo físico del disco
+                Storage::disk('public')->delete($imgUrl);
+            }
+        }
+        //eliminar los videos que se pidieron eliminar
+        if($request->has('deleted_videos')){
+            foreach($request->deleted_videos as $videoUrl){
+                DB::table('product_videos')->where('product_id', $product->product_id)
+                ->where('url_youtube', $videoUrl)->delete();
             }
 
         }
