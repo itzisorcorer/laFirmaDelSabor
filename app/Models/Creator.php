@@ -16,6 +16,7 @@ class Creator extends Model
         'location',
         'photo_url',
         'cover_photo_url',
-        'rating_avg'
+        'rating_avg',
+        'cv_url'
     ];
 }

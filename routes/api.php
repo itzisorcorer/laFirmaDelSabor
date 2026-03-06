@@ -39,6 +39,7 @@ Route::middleware('auth:sanctum')->group(function (){
 
     //RUTA DE FAVORITOS 
     Route::post('/favorites/toggle', [FavoriteController::class, 'toogle']);
+    Route::get('/favorites', [HomeController::class, 'getFavorites']);
 
     //ruta para videos
     Route::post('/products/{id}/videos', [ProductVideoController::class, 'store']);
@@ -79,6 +80,7 @@ Route::middleware('auth:sanctum')->group(function (){
     Route::get('/admin/orders', [AdminController::class, 'getMyAssignedOrders']);
     Route::put('/admin/orders/{id}', [AdminController::class, 'updateOrderStatus']);
     Route::get('/admin/products', [AdminController::class, 'getProducts']);
+    Route::post('/admin/creators', [CreatorController::class, 'store']);
 
     //ruta para actualizar datos personales del usuario
     Route::put('/profile', [AuthController::class, 'updateProfile']);

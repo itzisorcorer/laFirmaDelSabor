@@ -10,6 +10,8 @@ use App\Models\Category;
 use App\Models\Favorite;
 use App\Models\UserHistory;
 use App\Models\ProductImage;
+use League\CommonMark\Extension\Footnote\Event\FixOrphanedFootnotesAndRefsListener;
+
 
 class HomeController extends Controller
 {
@@ -51,6 +53,22 @@ class HomeController extends Controller
             ->get();
         
         $recentlyViewed = [];
+        //todos los productos
+        $allProducts = Product::where('status', true)->inRandomOrder()->take(20)->get()
+        ->map(function ($product) use ($favoriteIds) {
+            return [
+                'product_id' => $product->product_id,
+                'name' => $product->name,
+                'description' => $product->description,
+                'price' => '$' . number_format($product->price, 2) . ' c/u',
+                'rating' => '4.5',
+                'image_url' => ProductImage::where('product_id', $product->product_id)
+                    ->where('is_primary', true)->value('image_url'),
+                'is_favorite' => in_array($product->product_id, $favoriteIds),
+            ];
+        })
+        ;
+
         foreach ($historyRecords as $record) {
             $product = Product::find($record->product_id);
             if ($product && $product->status) {
@@ -74,7 +92,38 @@ class HomeController extends Controller
                 'categories' => $categories,
                 'recent_products' => $recentProducts,
                 'recently_viewed' => $recentlyViewed,
+                'all_products' => $allProducts
             ]
         ]);
+    }
+    //OBTENER TODOS LOS FAVORITOS DEL USUARIO
+    //GET /api/favorites
+    public function getFavorites(Request $request)
+    {
+        $user = $request->user();
+        
+        //buscamos los ids
+        $favoriteIds = Favorite::where('user_id', $user->id)->pluck('product_id')->toArray();
+
+        //Traemos la información completa de esos favoritos
+        $favorites = Product::whereIn('product_id', $favoriteIds)
+        ->where('status', true)->get()
+        ->map(function($product){
+            return[
+                'product_id' => $product->product_id,
+                'name' => $product->name,
+                'description' => $product->description,
+                'price' => '$' . number_format($product->price, 2) . ' c/u',
+                'rating' => '4.5',
+                'image_url' => ProductImage::where('product_id', $product->product_id)
+                    ->where('is_primary', true)->value('image_url'),
+                'is_favorite' => true, // Si está en favoritos, siempre es true
+            ];
+        });
+        return response()->json([
+            'success' => true,
+            'data' => $favorites
+        ]);
+
     }
 }

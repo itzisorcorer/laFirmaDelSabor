@@ -30,8 +30,9 @@ class CreatorController extends Controller
             'biography' => 'required|string',
             'location' => 'required|string|max:255',
             // Las fotos son opcionales por si no tienen en el momento
-            'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-            'cover_photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
+            'cover_photo' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
+            'cv_file' => 'nullable|mimes:pdf,docx|max:5120'
         ]);
 
         // 2. Subir Foto de Perfil (Si envió una)
@@ -45,6 +46,11 @@ class CreatorController extends Controller
         if ($request->hasFile('cover_photo')) {
             $coverPhotoUrl = $request->file('cover_photo')->store('creators/covers', 'public');
         }
+        //Subir el archivo pdf del CV
+        $cvUrl = null;
+        if($request->hasFile('cv_file')){
+            $cvUrl = $request->file('cv_file')->store('creators/cvs', 'public', );
+        }
 
         // 4. Guardar en Base de Datos
         $creator = Creator::create([
@@ -53,7 +59,9 @@ class CreatorController extends Controller
             'location' => $validated['location'],
             'photo_url' => $photoUrl,
             'cover_photo_url' => $coverPhotoUrl,
-            'rating_avg' => 0, // Inicia con 0 estrellas
+            'cv_url' => $cvUrl,
+            'rating_avg' => 0 // Inicia con 0 estrellas
+            
         ]);
 
         return response()->json([
