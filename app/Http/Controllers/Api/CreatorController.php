@@ -107,14 +107,56 @@ class CreatorController extends Controller
                 'name' => $creator->name,
                 'specialty' => 'Artesano Local | ' . ($creator->location ?? 'México'),
                 'about' => $creator->biography ?? 'Sin biografía disponible por el momento.',
-                'profile_image' => $creator->photo_url ?? 'https://img.freepik.com/free-photo/portrait-young-woman-with-natural-make-up_23-2149084945.jpg',
-                'background_image' => $creator->cover_photo_url ?? 'https://www.mexicodesconocido.com.mx/wp-content/uploads/2022/02/LP_Oaxaca-022-900x506.jpg',
+                'profile_image' => $creator->photo_url,
+                'background_image' => $creator->cover_photo_url,
                 'rating' => $creator->rating_avg ?? 5.0, 
                 'reviews_count' => $reviewsCount, 
                 // Si hay reseña, la mandamos; si no, un texto bonito por defecto
                 'featured_review' => $featuredReview ? '"' . $featuredReview->comment . '"' : '"Este creador aún no tiene reseñas."',
-                'best_rated' => $bestRated
+                'best_rated' => $bestRated,
+                'cv_url' => $creator->cv_url
             ]
+        ]);
+    }
+    //ACTUALIZAR CREADORA (solo para admin)
+    //POST /api/admin/creators/{id}
+    public function update(Request $request, $id)
+    {
+        $creator = Creator::find($id);
+        if(!$creator){
+            return response()->json([
+                'success' => false,
+                'message' => 'Creadora no encontrada'
+            ], 404);
+        }
+        $request -> validate([
+            'name' => 'required|string|max:255',
+            'biography' => 'required|string',
+            'location' => 'required|string|max:255',
+            'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:10240',
+            'cover_photo' => 'nullable|image|mimes:jpeg,png,jpg|max:10240',
+            'cv_file' => 'nullable|mimes:pdf|max:5120',
+        ]);
+        //si se subieron fotos nuevas, se reemplazan
+        if($request->hasFile('photo')){
+            $creator->photo_url = $request->file('photo')->store('creators/profiles', 'public');
+        }
+        if($request->hasFile('cover_photo')){
+            $creator->cover_photo_url = $request->file('cover_photo')->store('creators/covers', 'public');
+        }
+        if($request->hasFile('cv_file')){
+            $creator->cv_url = $request->file('cv_file')->store('creators/cvs', 'public');
+        }
+        //actualizamos los demás campos
+        $creator->name = $request->name;
+        $creator->biography = $request->biography;
+        $creator->location = $request->location;
+        $creator->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Creadora actualizada exitosamente',
+            
         ]);
     }
 }

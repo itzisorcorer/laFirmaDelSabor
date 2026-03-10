@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\FavoriteController;
 use App\Http\Controllers\Api\GestorController;
 use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\CategoryController;
+use \App\Http\Controllers\Api\ReviewController;
 
 //APARTADO RUTAS PÚBLICAS
 Route::post('/register', [AuthController::class, 'register']);
@@ -81,6 +82,10 @@ Route::middleware('auth:sanctum')->group(function (){
     Route::put('/admin/orders/{id}', [AdminController::class, 'updateOrderStatus']);
     Route::get('/admin/products', [AdminController::class, 'getProducts']);
     Route::post('/admin/creators', [CreatorController::class, 'store']);
+    Route::post('/admin/creators/{id}', [CreatorController::class, 'update']);
+
+    //REVIEWS
+    Route::post('/reviews', [ReviewController::class, 'store']);
 
     //ruta para actualizar datos personales del usuario
     Route::put('/profile', [AuthController::class, 'updateProfile']);

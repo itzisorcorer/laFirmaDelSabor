@@ -108,6 +108,7 @@ public function checkout(Request $request)
             ->whereIn('order_items.order_id', $orderIds)
             ->select(
                 'order_items.order_id',
+                'order_items.product_id',
                 'order_items.amount_item', 
                 'order_items.purchase_price', 
                 'products.name', 
