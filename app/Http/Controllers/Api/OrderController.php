@@ -104,6 +104,9 @@ public function checkout(Request $request)
             ->leftJoin('product_images', function($join) {
                 $join->on('products.product_id', '=', 'product_images.product_id')
                      ->where('product_images.is_primary', true); // Solo la portada
+            })->leftJoin('reviews', function($join) use ($user){
+                $join->on('products.product_id', '=', 'reviews.product_id')
+                     ->where('reviews.user_id', $user->id); // Solo la reseña del usuario logueado
             })
             ->whereIn('order_items.order_id', $orderIds)
             ->select(
@@ -112,7 +115,8 @@ public function checkout(Request $request)
                 'order_items.amount_item', 
                 'order_items.purchase_price', 
                 'products.name', 
-                'product_images.image_url as main_image_url'
+                'product_images.image_url as main_image_url',
+                'reviews.review_id'
             )
             ->get();
 
@@ -123,8 +127,17 @@ public function checkout(Request $request)
         $formattedOrders = $orders->map(function ($order) use ($itemsByOrder) {
             $orderId = $order->order_id ?? $order->id;
             
-            // Usamos values()->toArray() para forzar que sea una Lista [] y Flutter no se congele
-            $myItems = $itemsByOrder->get($orderId, collect())->values()->toArray();
+            // Transformamos los items para mandar un booleano limpio a Flutter
+            $myItems = $itemsByOrder->get($orderId, collect())->map(function($item) {
+                return [
+                    'product_id' => $item->product_id,
+                    'amount_item' => $item->amount_item,
+                    'purchase_price' => $item->purchase_price,
+                    'name' => $item->name,
+                    'main_image_url' => $item->main_image_url,
+                    'has_reviewed' => $item->review_id != null // 👈 Mandamos true o false
+                ];
+            })->toArray();
 
             return [
                 'order_id' => $orderId,
