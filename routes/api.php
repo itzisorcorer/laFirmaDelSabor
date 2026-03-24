@@ -93,6 +93,9 @@ Route::middleware('auth:sanctum')->group(function (){
     //Ruta para obtener las categorias y subcategorias (para filtros y creación de productos)
     Route::get('/categories-data', [CategoryController::class, 'index']);
 
+    //Ruta para registrar staff (admin o gestor)
+    Route::post('/admin/register-staff', [AdminController::class, 'registerStaff']);
+
 
 });
 

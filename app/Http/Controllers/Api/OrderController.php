@@ -14,7 +14,7 @@ class OrderController extends Controller
 {
 public function checkout(Request $request)
     {
-        // 1. Validamos que lleguen los datos desde Flutter
+        //  Validamos que lleguen los datos desde Flutter
         $request->validate([
             'items' => 'required|array',
             'total' => 'required|numeric'
@@ -25,7 +25,7 @@ public function checkout(Request $request)
         try {
             DB::beginTransaction();
 
-            // 2. Creamos la orden principal usando TUS nombres de columnas
+            //  Creamos la orden principal usando TUS nombres de columnas
             $orderId = DB::table('orders')->insertGetId([
                 'user_id' => $user->id,
                 'assigned_admin_id' => null, // Se queda nulo hasta que el gestor lo asigne
@@ -35,7 +35,7 @@ public function checkout(Request $request)
                 'updated_at' => now(),
             ], 'order_id');
 
-            // 3. Guardamos el detalle mapeando los nombres de Flutter a tu BD
+            //  Guardamos el detalle mapeando los nombres de Flutter a tu BD
             $orderItems = [];
             foreach ($request->items as $item) {
                 //Buscamos el producto y validamos stock
@@ -86,7 +86,7 @@ public function checkout(Request $request)
     {
         $user = $request->user();
 
-        // 1. Traemos TODAS las órdenes del usuario
+        // Traemos todas las órdenes del usuario
         $orders = DB::table('orders')
             ->where('user_id', $user->id)
             ->orderBy('created_at', 'desc')
@@ -98,7 +98,7 @@ public function checkout(Request $request)
 
         $orderIds = $orders->map(function($o) { return $o->order_id ?? $o->id; })->toArray();
 
-        // 2. Traemos TODOS los items y sus fotos (Con la nueva tabla)
+        //  Traemos todos los items y sus fotos
         $allItems = DB::table('order_items')
             ->join('products', 'order_items.product_id', '=', 'products.product_id')
             ->leftJoin('product_images', function($join) {
@@ -119,11 +119,10 @@ public function checkout(Request $request)
                 'reviews.review_id'
             )
             ->get();
-
-        // 3. Agrupamos los items
+        //  Agrupamos los items
         $itemsByOrder = $allItems->groupBy('order_id');
 
-        // 4. Armamos el paquete
+        // Armamos el paquete (el arbol json)
         $formattedOrders = $orders->map(function ($order) use ($itemsByOrder) {
             $orderId = $order->order_id ?? $order->id;
             
@@ -135,10 +134,9 @@ public function checkout(Request $request)
                     'purchase_price' => $item->purchase_price,
                     'name' => $item->name,
                     'main_image_url' => $item->main_image_url,
-                    'has_reviewed' => $item->review_id != null // 👈 Mandamos true o false
+                    'has_reviewed' => $item->review_id != null 
                 ];
             })->toArray();
-
             return [
                 'order_id' => $orderId,
                 'total_amount' => $order->total_amount,
@@ -147,7 +145,6 @@ public function checkout(Request $request)
                 'items' => $myItems 
             ];
         });
-
         return response()->json([
             'success' => true,
             'data' => $formattedOrders

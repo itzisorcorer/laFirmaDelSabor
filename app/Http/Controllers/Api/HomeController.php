@@ -17,17 +17,16 @@ class HomeController extends Controller
 {
     public function index(Request $request)
     {
-        // 1. Identificar quién está pidiendo los datos (gracias al Token)
+        // Identificar quién está pidiendo los datos (gracias al Token)
         $user = $request->user(); 
 
-        // 2. Obtener todas las categorías (Las que sembramos con tu Seeder)
+        // Obtener todas las categorías
         $categories = Category::select('category_id', 'name', 'image_url')->get();
 
-        // 3. Saber qué productos tiene en favoritos ESTE usuario
-        // (Devuelve un arreglo simple con los IDs, ej: [1, 5, 12])
+        //Saber qué productos tiene en favoritos este usuario
         $favoriteIds = Favorite::where('user_id', $user->id)->pluck('product_id')->toArray();
 
-        // 4. "Agregados recientemente" (Los últimos 10 productos creados)
+        // Agregados recientemente
         $recentProducts = Product::where('status', true)
             ->orderBy('created_at', 'desc')
             ->take(10)
@@ -38,20 +37,18 @@ class HomeController extends Controller
                     'name' => $product->name,
                     'description' => $product->description,
                     'price' => '$' . number_format($product->price, 2) . ' c/u', // Formateado
-                    'rating' => '4.5', //Calcular promedio real de Reviews después
+                    'rating' => '4.5',
                     'image_url' => ProductImage::where('product_id', $product->product_id)
                     ->where('is_primary', true)->value('image_url'),
-                    // Aquí ocurre la magia: si el ID está en sus favoritos, devuelve true
+                    //si el ID está en sus favoritos, devuelve true
                     'is_favorite' => in_array($product->product_id, $favoriteIds),
                 ];
             });
-
-        // 5. "Últimos vistos" (Del historial de ESTE usuario)
+        // Últimos vistos (Del historial de este usuario)
         $historyRecords = UserHistory::where('user_id', $user->id)
             ->orderBy('viewed_at', 'desc')
             ->take(10)
             ->get();
-        
         $recentlyViewed = [];
         //todos los productos
         $allProducts = Product::where('status', true)->inRandomOrder()->take(20)->get()
@@ -65,10 +62,7 @@ class HomeController extends Controller
                 'image_url' => ProductImage::where('product_id', $product->product_id)
                     ->where('is_primary', true)->value('image_url'),
                 'is_favorite' => in_array($product->product_id, $favoriteIds),
-            ];
-        })
-        ;
-
+            ];});
         foreach ($historyRecords as $record) {
             $product = Product::find($record->product_id);
             if ($product && $product->status) {
@@ -81,11 +75,8 @@ class HomeController extends Controller
                     'image_url' => ProductImage::where('product_id', $product->product_id)
                     ->where('is_primary', true)->value('image_url'),
                     'is_favorite' => in_array($product->product_id, $favoriteIds),
-                ];
-            }
-        }
-
-        // 6. Empaquetar todo y enviarlo a Flutter
+                ];}}
+        // Empaquetar todo y enviarlo a Flutter
         return response()->json([
             'success' => true,
             'data' => [

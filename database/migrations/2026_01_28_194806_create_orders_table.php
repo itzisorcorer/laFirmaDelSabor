@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('orders', function (Blueprint $table) {
             $table->id('order_id');
 
-            $table->foreignId('user_id')->constrained('users'); //para el comprador
+            $table->foreignId('user_id')->constrained('users'); 
 
-            $table->foreignId('assigned_admin_id')->nullable()->constrained('users'); //para el admin asignado a la orden
+            $table->foreignId('assigned_admin_id')->nullable()->constrained('users'); 
 
             $table->decimal('total_amount', 10, 2);
             $table->enum('status', [

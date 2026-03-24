@@ -6,12 +6,13 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Nette\Utils\Json;
+use App\Models\User;
+use \Illuminate\Support\Facades\Hash;
 
 class AdminController extends Controller
 {
     //obtener solo las ordenes asignadas a un admin
-// Obtener SOLO las órdenes asignadas a este admin (con sus PRODUCTOS)
-// Obtener SOLO las órdenes asignadas a este admin (con sus PRODUCTOS y DIRECCIÓN)
+    // Obtener SOLO las órdenes asignadas a este admin (con sus PRODUCTOS y DIRECCIÓN)
     public function getMyAssignedOrders(Request $request)
     {
         $user = $request->user();
@@ -94,5 +95,28 @@ class AdminController extends Controller
                 'success' => true,
                 'data' => $products
             ]);
+    }
+    public function registerStaff(Request $request){
+        
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:60|unique:users',
+            'password' => 'required|string|min:6',
+            'role' => 'required|in:admin,gestor'
+        ]);
+
+        // Creamos al nuevo administrador o gestor
+        $user = User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
+            'role' => $validated['role'],
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Personal registrado correctamente',
+            'user' => $user
+        ], 201);
     }
 }

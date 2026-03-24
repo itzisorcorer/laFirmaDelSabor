@@ -70,27 +70,33 @@ class CreatorController extends Controller
             'data' => $creator
         ], 201);
     }
-    public function getProfile($id){
+public function getProfile($id){
         $creator = DB::table('creators')->where('creator_id', $id)->first();
 
         if(!$creator){
-            return response()->json([
-                'success' => false,
-                'message' => 'Creadora no encontrada'
-            ], 404);
+            
+            return response()->json(['success' => false, 'message' => 'Creadora no encontrada'], 404);
         }
+
         $products = DB::table('products')->where('creator_id', $id)->where('status', 1)->get();
         $productsIds = $products->pluck('product_id');
 
         $reviewsCount = DB::table('reviews')->whereIn('product_id', $productsIds)->count();
+        $ratingAvg = DB::table('reviews')->whereIn('product_id', $productsIds)->avg('rating');
 
-        $featuredReview = DB::table('reviews')->whereIn('product_id', $productsIds)
-        ->orderBy('rating', 'desc')->orderBy('created_at', 'desc')->first();
+        
+        $reviewsList = DB::table('reviews')
+            ->join('users', 'reviews.user_id', '=', 'users.id')
+            ->whereIn('reviews.product_id', $productsIds)
+            ->select('reviews.rating', 'reviews.comment', 'users.name as user_name')
+            ->orderBy('reviews.created_at', 'desc')
+            ->take(5)
+            ->get();
 
-        $bestRated = $products->take(5)->map(function ($p){
+        $bestRated = $products->map(function ($p){
             $prodRating = DB::table('reviews')->where('product_id', $p->product_id)->avg('rating');
-
             $primaryImage = DB::table('product_images')->where('product_id', $p->product_id)->orderByDesc('is_primary')->first();
+            
             return[
                 'product_id' => $p->product_id,
                 'name' => $p->name,
@@ -98,9 +104,9 @@ class CreatorController extends Controller
                 'price' => $p->price,
                 'main_image_url' => $primaryImage ? $primaryImage->image_url : 'https://img.freepik.com/free-photo/portrait-young-woman-with-natural-make-up_23-2149084945.jpg',
                 'rating' => $prodRating ? round($prodRating, 1): 5.0
-
             ];
-        });
+        })->sortByDesc('rating')->take(5)->values(); 
+
         return response()->json([
             'success' => true,
             'data' => [
@@ -109,10 +115,10 @@ class CreatorController extends Controller
                 'about' => $creator->biography ?? 'Sin biografía disponible por el momento.',
                 'profile_image' => $creator->photo_url,
                 'background_image' => $creator->cover_photo_url,
-                'rating' => $creator->rating_avg ?? 5.0, 
+                'rating' => $ratingAvg ? number_format($ratingAvg, 1) : '5.0', 
                 'reviews_count' => $reviewsCount, 
-                // Si hay reseña, la mandamos; si no, un texto bonito por defecto
-                'featured_review' => $featuredReview ? '"' . $featuredReview->comment . '"' : '"Este creador aún no tiene reseñas."',
+                
+                'reviews' => $reviewsList,
                 'best_rated' => $bestRated,
                 'cv_url' => $creator->cv_url
             ]

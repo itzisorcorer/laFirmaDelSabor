@@ -61,7 +61,7 @@ class AuthController extends Controller
         //crear token de autenticación
         $token = $user->createToken('auth_token')->plainTextToken;
 
-        //responder a flutter
+        //enviar respuesta
         return response()->json([
             'message' => 'Hola de nuevo, ' . $user->name,
             'access_token' => $token,

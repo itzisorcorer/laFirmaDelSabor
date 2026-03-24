@@ -12,7 +12,6 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
-            // --- CAMPOS POR DEFECTO DE LARAVEL ---
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
@@ -22,7 +21,7 @@ return new class extends Migration
             
             
             
-            // 1. Datos Personales Extra
+            // 1. Datos Personales
             $table->string('phone_number', 15)->nullable();
             $table->date('birth_date')->nullable();
 
@@ -34,8 +33,7 @@ return new class extends Migration
             $table->string('postal_code', 10)->nullable();
             $table->string('country', 50)->default('México');
 
-            // 3. Roles (CRÍTICO: Admin, Gestor, Comprador)
-            // En Postgres esto crea una restricción CHECK automáticamente
+            // 3. Roles (Admin, Gestor, Comprador)
             $table->enum('role', ['admin', 'gestor', 'comprador'])->default('comprador');
 
             $table->timestamps();
